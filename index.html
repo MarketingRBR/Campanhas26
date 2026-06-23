@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBR | Painel Executivo de Campanhas de Venda 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/jquery.dataTables.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ LOADER ============ -->
+<div id="loader">
+  <svg class="loader-arrows" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+    <polygon class="arrow a1" points="0,10 50,10 80,60 50,110 0,110 30,60"/>
+    <polygon class="arrow a2" points="60,10 110,10 140,60 110,110 60,110 90,60"/>
+    <polygon class="arrow a3" points="120,10 170,10 200,60 170,110 120,110 150,60"/>
+  </svg>
+  <p>Carregando inteligência comercial RBR...</p>
+</div>
+
+<!-- ============ TOPBAR ============ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <svg class="brand-mark" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,2 18,2 28,20 18,38 0,38 10,20" fill="#005E96"/>
+      <polygon points="20,2 36,2 46,20 36,38 20,38 30,20" fill="#0D96D4"/>
+      <polygon points="38,2 52,2 60,20 52,38 38,38 46,20" fill="#B6B8BA"/>
+    </svg>
+    <div class="brand-text">
+      <span class="brand-title">RBR <strong>Inteligência Comercial</strong></span>
+      <span class="brand-sub">Controle de Campanhas de Venda · 2026</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="lastUpdate" class="last-update"></span>
+    <label class="upload-btn">
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
+      <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5v2zm7-18L5.33 9h4.59v6h4.16V9h4.59L12 2z"/></svg>
+      Importar Planilha
+    </label>
+    <button id="exportExcel" class="action-btn" title="Exportar para Excel">
+      <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 8H13z"/></svg>
+      Excel
+    </button>
+    <button id="exportPDF" class="action-btn" title="Exportar para PDF">
+      <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-3.5 12.5h-1v2h-1v-5h2c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5zm5 0c0 .83-.67 1.5-1.5 1.5h-1.5v-5H14c.83 0 1.5.67 1.5 1.5v2zm-7.5-1.5h.5v-1h-.5v1z"/></svg>
+      PDF
+    </button>
+  </div>
+</header>
+
+<!-- ============ FILTER BAR ============ -->
+<section class="filterbar" id="filterbar">
+  <div class="filter-group">
+    <label>Marca</label>
+    <select id="fMarca" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Cliente</label>
+    <select id="fCliente" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Região</label>
+    <select id="fRegiao" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Estado (UF)</label>
+    <select id="fUF" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Mês</label>
+    <select id="fMes" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Ano</label>
+    <select id="fAno" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Status</label>
+    <select id="fStatus" multiple>
+      <option value="EM ANDAMENTO">Campanha Ativa</option>
+      <option value="CONCLUÍDA">Campanha Encerrada</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Tipo de Pagamento</label>
+    <select id="fPagamento" multiple></select>
+  </div>
+  <div class="filter-group">
+    <label>Meta Atingida</label>
+    <select id="fMetaAtingida" multiple>
+      <option value="Sim">Sim</option>
+      <option value="Não">Não</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Faixa de Performance</label>
+    <select id="fFaixa" multiple>
+      <option value="Crítico">Crítico (&lt;80%)</option>
+      <option value="Atenção">Atenção (80–99%)</option>
+      <option value="Meta Atingida">Meta Atingida (100–119%)</option>
+      <option value="Super Performance">Super Performance (≥120%)</option>
+      <option value="Sem Meta">Sem Meta</option>
+    </select>
+  </div>
+  <button id="clearFilters" class="clear-btn">Limpar Filtros</button>
+</section>
+
+<main class="dashboard">
+
+  <!-- ============ KPI CARDS ============ -->
+  <section class="kpi-grid" id="kpiGrid"></section>
+
+  <!-- ============ ROW: MARCAS + CLIENTES ============ -->
+  <section class="grid-2">
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Ranking de Marcas</h3>
+        <span class="card-sub">Meta vs. Resultado vs. Atingimento</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartMarcas"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Ranking de Clientes</h3>
+        <span class="card-sub">Top 10 clientes por desempenho</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartClientes"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ ROW: REGIÃO + EVOLUÇÃO ============ -->
+  <section class="grid-2">
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Resultado por Região / Estado</h3>
+        <span class="card-sub">Distribuição de resultado realizado</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartRegiao"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Evolução Mensal</h3>
+        <span class="card-sub">Meta x Realizado por competência</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ ROW: PAGAMENTO + DONUT STATUS ============ -->
+  <section class="grid-2">
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Distribuição por Tipo de Pagamento</h3>
+        <span class="card-sub">Em Peça · Em Dinheiro · Bonificação · Outros</span>
+      </div>
+      <div class="chart-wrap small"><canvas id="chartPagamento"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Faixas de Performance</h3>
+        <span class="card-sub">Distribuição das campanhas por faixa de atingimento</span>
+      </div>
+      <div class="chart-wrap small"><canvas id="chartFaixa"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ ROW: TOP10 BEST / WORST ============ -->
+  <section class="grid-2">
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet good"></span>Top 10 Campanhas — Maior Atingimento</h3>
+      </div>
+      <div class="chart-wrap"><canvas id="chartTop10"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet bad"></span>Top 10 Campanhas Críticas — Menor Atingimento</h3>
+      </div>
+      <div class="chart-wrap"><canvas id="chartBottom10"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ============ TABLE ============ -->
+  <section class="card table-card">
+    <div class="card-head">
+      <h3><span class="arrow-bullet"></span>Campanhas — Tabela Dinâmica</h3>
+      <span class="card-sub">Pesquisável, ordenável e exportável</span>
+    </div>
+    <div class="table-wrap">
+      <table id="campaignsTable" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>Marca</th>
+            <th>Cliente</th>
+            <th>Cidade</th>
+            <th>UF</th>
+            <th>Mês</th>
+            <th>Tipo Campanha</th>
+            <th>Premiação</th>
+            <th>Status</th>
+            <th>Meta</th>
+            <th>Realizado</th>
+            <th>% Atingimento</th>
+            <th>Faixa</th>
+            <th>Meta Atingida</th>
+            <th>Custo Final</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="dashboard-footer">
+    <svg class="footer-pattern" viewBox="0 0 300 40" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,2 14,2 22,20 14,38 0,38 8,20" fill="#005E96" opacity=".15"/>
+      <polygon points="16,2 30,2 38,20 30,38 16,38 24,20" fill="#0D96D4" opacity=".15"/>
+      <polygon points="32,2 44,2 52,20 44,38 32,38 40,20" fill="#B6B8BA" opacity=".25"/>
+    </svg>
+    <p>RBR · Ricardo Bernardino Representações Ltda. — Painel Executivo de Inteligência Comercial · Dados atualizados a partir da planilha de controle de campanhas 2026</p>
+  </footer>
+
+</main>
+
+<!-- ============ LIBS ============ -->
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/jquery.min.js"></script>
+<script src="vendor/jquery.dataTables.min.js"></script>
+<script src="vendor/papaparse.min.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
