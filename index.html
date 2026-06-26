@@ -6,7 +6,7 @@
 <title>RBR | Painel Executivo de Campanhas de Venda 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="jquery.dataTables.min.css">
+<link rel="stylesheet" href="vendor/jquery.dataTables.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -52,167 +52,187 @@
   </div>
 </header>
 
-<!-- ============ FILTER BAR ============ -->
-<section class="filterbar" id="filterbar">
-  <div class="filter-group">
-    <label>Marca</label>
-    <select id="fMarca" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Cliente</label>
-    <select id="fCliente" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Região</label>
-    <select id="fRegiao" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Estado (UF)</label>
-    <select id="fUF" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Mês</label>
-    <select id="fMes" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Ano</label>
-    <select id="fAno" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Status</label>
-    <select id="fStatus" multiple>
-      <option value="EM ANDAMENTO">Campanha Ativa</option>
-      <option value="CONCLUÍDA">Campanha Encerrada</option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label>Tipo de Pagamento</label>
-    <select id="fPagamento" multiple></select>
-  </div>
-  <div class="filter-group">
-    <label>Meta Atingida</label>
-    <select id="fMetaAtingida" multiple>
-      <option value="Sim">Sim</option>
-      <option value="Não">Não</option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label>Faixa de Performance</label>
-    <select id="fFaixa" multiple>
-      <option value="Crítico">Crítico (&lt;80%)</option>
-      <option value="Atenção">Atenção (80–99%)</option>
-      <option value="Meta Atingida">Meta Atingida (100–119%)</option>
-      <option value="Super Performance">Super Performance (≥120%)</option>
-      <option value="Sem Meta">Sem Meta</option>
-    </select>
-  </div>
-  <button id="clearFilters" class="clear-btn">Limpar Filtros</button>
-</section>
+<!-- ============ FILTER BAR (dropdown-checklist estilo Power BI) ============ -->
+<section class="filterbar" id="filterBar"><!-- preenchido via JS --></section>
+
+<!-- ============ TABS ============ -->
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="executivo">💎 Executivo</button>
+  <button class="tab-btn" data-tab="marcas">🏷️ Marcas</button>
+  <button class="tab-btn" data-tab="clientes">🏆 Clientes</button>
+  <button class="tab-btn" data-tab="geo">🌎 Geográfico</button>
+  <button class="tab-btn" data-tab="roi">💰 ROI</button>
+  <button class="tab-btn" data-tab="eficiencia">🎯 Eficiência</button>
+  <button class="tab-btn" data-tab="alertas">🚨 Alertas <span id="alertCountBadge" class="tab-alert-badge"></span></button>
+</nav>
 
 <main class="dashboard">
 
-  <!-- ============ KPI CARDS ============ -->
-  <section class="kpi-grid" id="kpiGrid"></section>
+  <section class="tab-panel active" id="tab-executivo">
+    <section class="kpi-grid" id="kpiGridExec"></section>
 
-  <!-- ============ ROW: MARCAS + CLIENTES ============ -->
-  <section class="grid-2">
-    <div class="card chart-card">
-      <div class="card-head">
-        <h3><span class="arrow-bullet"></span>Ranking de Marcas</h3>
-        <span class="card-sub">Meta vs. Resultado vs. Atingimento</span>
+    <section class="grid-2">
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Ranking de Marcas</h3><span class="card-sub">Meta vs. Resultado vs. Atingimento</span></div>
+        <div class="chart-wrap"><canvas id="chartMarcasExec"></canvas></div>
       </div>
-      <div class="chart-wrap"><canvas id="chartMarcas"></canvas></div>
-    </div>
-    <div class="card chart-card">
-      <div class="card-head">
-        <h3><span class="arrow-bullet"></span>Ranking de Clientes</h3>
-        <span class="card-sub">Top 10 clientes por desempenho</span>
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Evolução Mensal</h3><span class="card-sub">Meta x Realizado por competência</span></div>
+        <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
       </div>
-      <div class="chart-wrap"><canvas id="chartClientes"></canvas></div>
-    </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Faixas de Performance</h3><span class="card-sub">Distribuição das campanhas</span></div>
+        <div class="chart-wrap small"><canvas id="chartFaixaExec"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Distribuição por Tipo de Campanha</h3><span class="card-sub">Com base na premiação</span></div>
+        <div class="chart-wrap small"><canvas id="chartTipoExec"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <div class="card-head"><h3><span class="arrow-bullet"></span>Campanhas — Tabela Dinâmica</h3><span class="card-sub">Pesquisável, ordenável e exportável</span></div>
+      <div class="table-wrap">
+        <table id="campaignsTable" class="display" style="width:100%">
+          <thead><tr>
+            <th>Marca</th><th>Cliente</th><th>Cidade</th><th>UF</th><th>Mês</th><th>Tipo</th><th>Premiação</th>
+            <th>Status</th><th>Meta</th><th>Realizado</th><th>% Atingimento</th><th>Faixa</th><th>Meta Atingida</th><th>Custo Final</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
   </section>
 
-  <!-- ============ ROW: REGIÃO + EVOLUÇÃO ============ -->
-  <section class="grid-2">
-    <div class="card chart-card">
+  <section class="tab-panel" id="tab-marcas">
+    <section class="card chart-card">
       <div class="card-head">
-        <h3><span class="arrow-bullet"></span>Resultado por Região / Estado</h3>
-        <span class="card-sub">Distribuição de resultado realizado</span>
+        <h3><span class="arrow-bullet"></span>Ranking de Marcas (Fornecedor)</h3>
+        <span class="card-sub">Escolha o indicador para ordenar o ranking</span>
       </div>
-      <div class="chart-wrap"><canvas id="chartRegiao"></canvas></div>
-    </div>
-    <div class="card chart-card">
-      <div class="card-head">
-        <h3><span class="arrow-bullet"></span>Evolução Mensal</h3>
-        <span class="card-sub">Meta x Realizado por competência</span>
+      <div class="inline-control">
+        <label>Ordenar por:</label>
+        <select id="marcaMetricSelect">
+          <option value="pctMetas">% de Metas Atingidas</option>
+          <option value="crescimento">Crescimento Médio</option>
+          <option value="investimento">Investimento Realizado</option>
+          <option value="roi">ROI da Campanha</option>
+        </select>
       </div>
-      <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
-    </div>
+      <div class="chart-wrap tall"><canvas id="chartMarcaRanking"></canvas></div>
+    </section>
+
+    <section class="card table-card">
+      <div class="card-head"><h3><span class="arrow-bullet"></span>Detalhe por Marca</h3></div>
+      <div class="table-wrap">
+        <table id="marcasTable" class="display" style="width:100%">
+          <thead><tr>
+            <th>Marca</th><th>Campanhas</th><th>% Metas Atingidas</th><th>Crescimento Médio</th><th>Investimento Realizado</th><th>ROI Médio</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
   </section>
 
-  <!-- ============ ROW: PAGAMENTO + DONUT STATUS ============ -->
-  <section class="grid-2">
-    <div class="card chart-card">
-      <div class="card-head">
-        <h3><span class="arrow-bullet"></span>Distribuição por Tipo de Pagamento</h3>
-        <span class="card-sub">Em Peça · Em Dinheiro · Bonificação · Outros</span>
+  <section class="tab-panel" id="tab-clientes">
+    <section class="grid-3">
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet good"></span>Top 10 — Maior Crescimento</h3></div>
+        <div class="chart-wrap"><canvas id="chartClienteCrescimento"></canvas></div>
       </div>
-      <div class="chart-wrap small"><canvas id="chartPagamento"></canvas></div>
-    </div>
-    <div class="card chart-card">
-      <div class="card-head">
-        <h3><span class="arrow-bullet"></span>Faixas de Performance</h3>
-        <span class="card-sub">Distribuição das campanhas por faixa de atingimento</span>
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Top 10 — Mais Campanhas</h3></div>
+        <div class="chart-wrap"><canvas id="chartClienteQtd"></canvas></div>
       </div>
-      <div class="chart-wrap small"><canvas id="chartFaixa"></canvas></div>
-    </div>
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet good"></span>Top 10 — Maior ROI</h3></div>
+        <div class="chart-wrap"><canvas id="chartClienteROI"></canvas></div>
+      </div>
+    </section>
   </section>
 
-  <!-- ============ ROW: TOP10 BEST / WORST ============ -->
-  <section class="grid-2">
-    <div class="card chart-card">
+  <section class="tab-panel" id="tab-geo">
+    <section class="card">
       <div class="card-head">
-        <h3><span class="arrow-bullet good"></span>Top 10 Campanhas — Maior Atingimento</h3>
+        <h3><span class="arrow-bullet"></span>Mapa de Calor — Estados do Nordeste</h3>
+        <span class="card-sub">Aproximação geográfica em grade · cor mais escura = maior valor</span>
       </div>
-      <div class="chart-wrap"><canvas id="chartTop10"></canvas></div>
-    </div>
-    <div class="card chart-card">
-      <div class="card-head">
-        <h3><span class="arrow-bullet bad"></span>Top 10 Campanhas Críticas — Menor Atingimento</h3>
+      <div class="inline-control">
+        <label>Métrica:</label>
+        <select id="geoMetricSelect">
+          <option value="vendas">Vendas (Realizado)</option>
+          <option value="metaPct">% Metas Atingidas</option>
+          <option value="crescimento">Crescimento Médio</option>
+        </select>
       </div>
-      <div class="chart-wrap"><canvas id="chartBottom10"></canvas></div>
-    </div>
+      <div id="geoMapGrid" class="geo-grid"></div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Vendas por Estado</h3></div>
+        <div class="chart-wrap"><canvas id="chartVendasUF"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet"></span>Metas Atingidas por Estado (%)</h3></div>
+        <div class="chart-wrap"><canvas id="chartMetaUF"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card chart-card">
+      <div class="card-head"><h3><span class="arrow-bullet"></span>Crescimento por Região</h3></div>
+      <div class="chart-wrap small"><canvas id="chartCrescimentoRegiao"></canvas></div>
+    </section>
   </section>
 
-  <!-- ============ TABLE ============ -->
-  <section class="card table-card">
-    <div class="card-head">
-      <h3><span class="arrow-bullet"></span>Campanhas — Tabela Dinâmica</h3>
-      <span class="card-sub">Pesquisável, ordenável e exportável</span>
-    </div>
-    <div class="table-wrap">
-      <table id="campaignsTable" class="display" style="width:100%">
-        <thead>
-          <tr>
-            <th>Marca</th>
-            <th>Cliente</th>
-            <th>Cidade</th>
-            <th>UF</th>
-            <th>Mês</th>
-            <th>Tipo Campanha</th>
-            <th>Premiação</th>
-            <th>Status</th>
-            <th>Meta</th>
-            <th>Realizado</th>
-            <th>% Atingimento</th>
-            <th>Faixa</th>
-            <th>Meta Atingida</th>
-            <th>Custo Final</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <section class="tab-panel" id="tab-roi">
+    <section class="kpi-grid" id="kpiGridROI"></section>
+
+    <section class="grid-2">
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet good"></span>Campanhas Mais Rentáveis</h3><span class="card-sub">Top 10 por ROI (Realizado ÷ Custo Final)</span></div>
+        <div class="chart-wrap"><canvas id="chartROITop"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="card-head"><h3><span class="arrow-bullet bad"></span>Campanhas Menos Rentáveis</h3><span class="card-sub">Bottom 10 por ROI</span></div>
+        <div class="chart-wrap"><canvas id="chartROIBottom"></canvas></div>
+      </div>
+    </section>
+
+    <section class="card chart-card">
+      <div class="card-head"><h3><span class="arrow-bullet"></span>ROI Médio por Fabricante</h3></div>
+      <div class="chart-wrap tall"><canvas id="chartROIFabricante"></canvas></div>
+    </section>
+  </section>
+
+  <section class="tab-panel" id="tab-eficiencia">
+    <section class="card chart-card">
+      <div class="card-head">
+        <h3><span class="arrow-bullet"></span>Eficiência por Tipo de Campanha</h3>
+        <span class="card-sub">Cashback · Brindes · Bonificação · Pontuação · Viagem · Vale-compras</span>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chartEficiencia"></canvas></div>
+    </section>
+
+    <section class="card table-card">
+      <div class="card-head"><h3><span class="arrow-bullet"></span>Detalhe por Tipo de Campanha</h3></div>
+      <div class="table-wrap">
+        <table id="eficienciaTable" class="display" style="width:100%">
+          <thead><tr>
+            <th>Tipo de Campanha</th><th>Campanhas</th><th>% Metas Atingidas</th><th>Crescimento Médio</th><th>Custo Médio</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="tab-panel" id="tab-alertas">
+    <section class="alert-grid" id="alertGrid"></section>
   </section>
 
   <footer class="dashboard-footer">
@@ -221,19 +241,19 @@
       <polygon points="16,2 30,2 38,20 30,38 16,38 24,20" fill="#0D96D4" opacity=".15"/>
       <polygon points="32,2 44,2 52,20 44,38 32,38 40,20" fill="#B6B8BA" opacity=".25"/>
     </svg>
-    <p>RBR · Ricardo Bernardino Representações Ltda. — Painel Executivo de Inteligência Comercial · Dados atualizados a partir da planilha de controle de campanhas 2026</p>
+    <p>RBR · Ricardo Bernardino Representações Ltda. — Painel Executivo de Inteligência Comercial</p>
   </footer>
 
 </main>
 
-<!-- ============ LIBS ============ -->
-<script src="chart.umd.min.js"></script>
-<script src="jquery.min.js"></script>
-<script src="jquery.dataTables.min.js"></script>
-<script src="papaparse.min.js"></script>
-<script src="xlsx.full.min.js"></script>
-<script src="jspdf.umd.min.js"></script>
-<script src="jspdf.plugin.autotable.min.js"></script>
+<!-- ============ LIBS (100% locais, sem CDN) ============ -->
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/jquery.min.js"></script>
+<script src="vendor/jquery.dataTables.min.js"></script>
+<script src="vendor/papaparse.min.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
 <script src="data.js"></script>
 <script src="script.js"></script>
 </body>
